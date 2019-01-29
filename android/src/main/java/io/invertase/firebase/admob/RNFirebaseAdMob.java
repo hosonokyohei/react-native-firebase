@@ -4,6 +4,7 @@ package io.invertase.firebase.admob;
 import android.app.Activity;
 import android.util.Log;
 
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class RNFirebaseAdMob extends ReactContextBaseJavaModule {
+public class RNFirebaseAdMob extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
   private static final String TAG = "RNFirebaseAdMob";
   private HashMap<String, RNFirebaseAdmobInterstitial> interstitials = new HashMap<>();
@@ -24,6 +25,7 @@ public class RNFirebaseAdMob extends ReactContextBaseJavaModule {
   RNFirebaseAdMob(ReactApplicationContext reactContext) {
     super(reactContext);
     Log.d(TAG, "New instance");
+    reactContext.addLifecycleEventListener(this);
   }
 
   ReactApplicationContext getContext() {
@@ -108,5 +110,28 @@ public class RNFirebaseAdMob extends ReactContextBaseJavaModule {
     final Map<String, Object> constants = new HashMap<>();
     constants.put("DEVICE_ID_EMULATOR", AdRequest.DEVICE_ID_EMULATOR);
     return constants;
+  }
+
+  @Override
+  public void onHostResume() {
+    for (String adUnit: rewardedVideos.keySet()) {
+      rewardedVideos.get(adUnit).resume();
+    }
+  }
+
+  @Override
+  public void onHostPause() {
+    for (String adUnit: rewardedVideos.keySet()) {
+      rewardedVideos.get(adUnit).pause();
+    }
+  }
+
+  @Override
+  public void onHostDestroy() {
+    for (String adUnit: rewardedVideos.keySet()) {
+      Log.d("Ads", "onHostDestroy: " + adUnit);
+      rewardedVideos.get(adUnit).release();
+    }
+    rewardedVideos.clear();
   }
 }

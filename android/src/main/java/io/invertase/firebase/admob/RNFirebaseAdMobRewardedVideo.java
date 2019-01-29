@@ -2,6 +2,7 @@ package io.invertase.firebase.admob;
 
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
@@ -26,6 +27,7 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
     adMob = adMobInstance;
 
     rewardedVideo = MobileAds.getRewardedVideoAdInstance(adMob.getContext());
+    Log.d("Ads", "RNFirebaseAdMobRewardedVideo: " + adUnit);
 
     Activity activity = adMob.getActivity();
     final RNFirebaseAdMobRewardedVideo _this = this;
@@ -46,6 +48,7 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
    * @param adRequest
    */
   void loadAd(final AdRequest adRequest) {
+    Log.d("Ads", "loadAd: " + adUnit);
     Activity activity = adMob.getActivity();
     if (activity != null) {
       activity.runOnUiThread(new Runnable() {
@@ -136,5 +139,16 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
     }
 
     Utils.sendEvent(adMob.getContext(), "rewarded_video_event", map);
+  }
+
+  public void resume() {
+    rewardedVideo.resume(adMob.getContext());
+  }
+  public void pause() {
+    rewardedVideo.pause(adMob.getContext());
+  }
+  public void release() {
+    rewardedVideo.destroy(adMob.getContext());
+    rewardedVideo.setRewardedVideoAdListener(null);
   }
 }

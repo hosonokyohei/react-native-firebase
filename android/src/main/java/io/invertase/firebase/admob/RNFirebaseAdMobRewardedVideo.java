@@ -2,7 +2,6 @@ package io.invertase.firebase.admob;
 
 
 import android.app.Activity;
-import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
@@ -26,10 +25,14 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
     adUnit = adUnitString;
     adMob = adMobInstance;
 
-    rewardedVideo = MobileAds.getRewardedVideoAdInstance(adMob.getContext());
-    Log.d("Ads", "RNFirebaseAdMobRewardedVideo: " + adUnit);
-
     Activity activity = adMob.getActivity();
+    // Some ads won't work without passing activity, or the app will crash
+    if (activity == null) {
+      rewardedVideo = MobileAds.getRewardedVideoAdInstance(adMob.getContext());
+    } else {
+      rewardedVideo = MobileAds.getRewardedVideoAdInstance(activity);
+    }
+
     final RNFirebaseAdMobRewardedVideo _this = this;
 
     if (activity != null) {
@@ -48,7 +51,6 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
    * @param adRequest
    */
   void loadAd(final AdRequest adRequest) {
-    Log.d("Ads", "loadAd: " + adUnit);
     Activity activity = adMob.getActivity();
     if (activity != null) {
       activity.runOnUiThread(new Runnable() {
@@ -72,6 +74,21 @@ public class RNFirebaseAdMobRewardedVideo implements RewardedVideoAdListener {
           if (rewardedVideo.isLoaded()) {
             rewardedVideo.show();
           }
+        }
+      });
+    }
+  }
+
+  /**
+   * Show the loaded interstitial, if it's loaded
+   */
+  void setCustomData(final String customData) {
+    Activity activity = adMob.getActivity();
+    if (activity != null) {
+      activity.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+           rewardedVideo.setCustomData(customData);
         }
       });
     }
